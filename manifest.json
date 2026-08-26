@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "Dadealbit 知乎文章提取器",
+  "version": "1.1.1",
+  "description": "一键把知乎文章/回答提取为 Markdown、HTML、PDF 并自动打包 zip（含图片与数学公式）",
+  "permissions": [
+    "downloads",
+    "storage",
+    "tabs",
+    "debugger",
+    "offscreen",
+    "notifications"
+  ],
+  "host_permissions": [
+    "https://*.zhihu.com/*",
+    "https://*.zhimg.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Dadealbit 知乎文章提取器",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.zhihu.com/*"],
+      "js": ["lib/turndown.js", "lib/turndown-plugin-gfm.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["lib/tex-svg-full.js"],
+      "matches": ["https://*.zhihu.com/*"]
+    }
+  ]
+}
