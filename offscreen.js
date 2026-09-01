@@ -11,19 +11,27 @@ function sanitizeFilename(name) {
   return cleaned || "未命名文章";
 }
 
-// 抓图片字节: 带知乎 Referer(绕过防盗链); 失败降级无 Referer; 再失败返回 null
+// 抓图片字节: 带知乎 Referer(绕过防盗链); 失败降级无 Referer; 每张重试 2 次
 async function fetchImageBytes(url) {
-  try {
-    const resp = await fetch(url, {
-      credentials: "include",
-      headers: { Referer: "https://www.zhihu.com/" },
-    });
-    if (resp.ok) return await resp.blob();
-  } catch (e) { /* 继续 */ }
-  try {
-    const resp = await fetch(url, { credentials: "include" });
-    if (resp.ok) return await resp.blob();
-  } catch (e) { /* ignore */ }
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const resp = await fetch(url, {
+        credentials: "include",
+        headers: { Referer: "https://www.zhihu.com/" },
+      });
+      if (resp.ok) {
+        const blob = await resp.blob();
+        if (blob && blob.size > 0) return blob;
+      }
+    } catch (e) { /* 继续 */ }
+    try {
+      const resp = await fetch(url, { credentials: "include" });
+      if (resp.ok) {
+        const blob = await resp.blob();
+        if (blob && blob.size > 0) return blob;
+      }
+    } catch (e) { /* ignore */ }
+  }
   return null;
 }
 

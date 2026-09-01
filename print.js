@@ -68,16 +68,26 @@
 // 前端库生成 PDF: html2canvas 截图 + jsPDF 分页(不弹任何界面)
 async function generatePdfWithJs() {
   // 先把图片换成同源 URL(扩展页有 zhimg 主机权限, fetch 不受 CORS 限制),
-  // 否则 html2canvas 会因跨域图片失败
+  // 并带知乎 Referer 绕过防盗链; 否则 html2canvas 会因跨域图片失败
   await Promise.all(Array.from(document.images).map(async (img) => {
     if (!img.src || !/^https?:/i.test(img.src)) return;
+    let blob = null;
     try {
-      const resp = await fetch(img.src, { credentials: "include" });
-      if (resp.ok) {
-        const blob = await resp.blob();
-        img.src = URL.createObjectURL(blob);
-      }
-    } catch (e) { /* 失败保持原样, 后面按失败图处理 */ }
+      const resp = await fetch(img.src, {
+        credentials: "include",
+        headers: { Referer: "https://www.zhihu.com/" },
+      });
+      if (resp.ok) blob = await resp.blob();
+    } catch (e) { /* 继续 */ }
+    if (!blob) {
+      try {
+        const resp = await fetch(img.src, { credentials: "include" });
+        if (resp.ok) blob = await resp.blob();
+      } catch (e2) { /* 失败保持原样, 后面按失败图处理 */ }
+    }
+    if (blob) {
+      img.src = URL.createObjectURL(blob);
+    }
   }));
 
   const target = document.getElementById("content");

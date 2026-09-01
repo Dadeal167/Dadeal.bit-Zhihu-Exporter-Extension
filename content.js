@@ -192,7 +192,7 @@
       ".AnswerItem-extraInfo, .VoteButton, [data-draft-type], .CopyrightRichText-tooltip, " +
       ".Post-Author, .ContentItem-rightButton, .RichContent-cover, .KfeCollection-AnswerTopCard-Container, " +
       ".VideoPlayButton, .PlayButton, .GifPlayer-icon, .video-play-button, " +
-      "[class*='PlayButton'], [class*='play-button'], [class*='VideoPlayer'], [class*='GifPlayer-icon']"
+      "[class*='PlayButton'], [class*='play-button']"
     ).forEach((n) => n.remove());
 
     // 图片: 替换为 ../assets/... 相对路径并记录下载清单(跳过 data: 内联图和头像)
@@ -215,6 +215,9 @@
       images.push({ url: src, name });
       // ZIP 内 md/html 与 assets 同级, 相对路径直接 assets/...(不再上跳)
       img.setAttribute("src", "assets/" + safeTitle + "/" + name);
+      // 本地图片缺失时自动回退原图 URL(在线补图)
+      img.setAttribute("onerror",
+        "this.onerror=null;this.src='" + src.replace(/'/g, "%27") + "';");
       img.setAttribute("data-orig-src", src); // 记住原网址(打印页还原用)
       ["data-actualsrc", "data-original", "data-src", "srcset", "data-lazy-status"].forEach(
         (attr) => img.removeAttribute(attr));

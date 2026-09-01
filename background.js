@@ -74,14 +74,15 @@ async function generatePdf(title, fullHtml) {
       : undefined;
     await cdpCommand(tab.id, "Page.setDocumentContent", { frameId, html: fullHtml });
 
-    // 轮询等待公式渲染 + 图片加载完成(最多 60 秒, 动图较大给足时间)。
-    // 图片判定用 complete && naturalWidth>0: 能区分"还在加载"与"加载失败"
+    // 轮询等待公式渲染 + 图片加载"结束"(最多 60 秒, 动图较大给足时间)。
+    // 用 complete 判定: 无论加载成功还是失败都算结束, 避免个别被防盗链拦住的
+    // 图片让整个流程卡满超时
     const deadline = Date.now() + 60000;
     let ready = false;
     while (Date.now() < deadline) {
       try {
         const r = await cdpCommand(tab.id, "Runtime.evaluate", {
-          expression: "document.body.getAttribute('data-mathjax-ready')==='1' && Array.from(document.images).every(function(i){return i.complete && i.naturalWidth > 0;})",
+          expression: "document.body.getAttribute('data-mathjax-ready')==='1' && Array.from(document.images).every(function(i){return i.complete;})",
           returnByValue: true,
         });
         if (r.result && r.result.value === true) { ready = true; break; }
