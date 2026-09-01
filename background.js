@@ -341,7 +341,7 @@ async function openBatch(urls) {
   await chrome.storage.session.set({ batchActive: true, batchCount: list.length });
   for (const url of list) {
     chrome.tabs.create({ url, active: false });
-    // 间隔 1.5 秒开一个, 避免瞬间大量标签页触发知乎风控
-    await new Promise((r) => setTimeout(r, 1500));
+    // 随机 3~8 秒开一个, 模拟正常阅读节奏, 降低触发知乎风控的概率
+    await new Promise((r) => setTimeout(r, 3000 + Math.floor(Math.random() * 5000)));
   }
 }

@@ -190,7 +190,9 @@
     clone.querySelectorAll(
       "script, style, noscript, button, .RichContent-actions, .ContentItem-actions, " +
       ".AnswerItem-extraInfo, .VoteButton, [data-draft-type], .CopyrightRichText-tooltip, " +
-      ".Post-Author, .ContentItem-rightButton, .RichContent-cover, .KfeCollection-AnswerTopCard-Container"
+      ".Post-Author, .ContentItem-rightButton, .RichContent-cover, .KfeCollection-AnswerTopCard-Container, " +
+      ".VideoPlayButton, .PlayButton, .GifPlayer-icon, .video-play-button, " +
+      "[class*='PlayButton'], [class*='play-button'], [class*='VideoPlayer'], [class*='GifPlayer-icon']"
     ).forEach((n) => n.remove());
 
     // 图片: 替换为 ../assets/... 相对路径并记录下载清单(跳过 data: 内联图和头像)
@@ -218,9 +220,10 @@
         (attr) => img.removeAttribute(attr));
     }
 
-    // 知乎部分"动图"实际是 <video>: 取 poster 封面转成静态图进 PDF/导出; 无封面的移除
+    // 知乎部分"动图"实际是 <video>: 取 poster(或 data-poster)封面转成静态图进 PDF/导出; 无封面的移除
     for (const video of clone.querySelectorAll("video")) {
-      let poster = video.getAttribute("poster") || "";
+      let poster = video.getAttribute("poster")
+        || video.getAttribute("data-poster") || "";
       if (poster && !poster.startsWith("data:")) {
         try {
           poster = new URL(poster, location.href).href;
@@ -366,10 +369,28 @@
       + bodyHtml + "\n</body>\n</html>";
   }
 
+  function detectCaptcha() {
+    try {
+      if (/captcha/i.test(location.href)) return true;
+      const t = (document.title || "").toLowerCase();
+      if (t.indexOf("安全验证") >= 0 || t.indexOf("验证码") >= 0 || t.indexOf("captcha") >= 0) return true;
+      return !!document.querySelector(
+        ".Captcha, .captcha, [class*='Captcha'], [class*='captcha'], .Modal-wrapper .CaptchaContainer");
+    } catch (e) {
+      return false;
+    }
+  }
+
   async function exportArticle(formats) {
     const data = extract();
     if (data && data.ok === false) return data;
     if (!data) {
+      if (detectCaptcha()) {
+        return {
+          ok: false,
+          error: "知乎触发了安全验证(风控)。请先在当前页面手动完成验证, 稍后再试; 批量时建议暂停、减小每批数量。",
+        };
+      }
       return { ok: false, error: "未找到文章正文(请确认当前页是知乎文章/回答, 且已展开全文)" };
     }
 
