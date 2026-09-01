@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Dadealbit 知乎文章提取器",
-  "version": "1.1.1",
+  "version": "1.0.0",
   "description": "一键把知乎文章/回答提取为 Markdown、HTML、PDF 并自动打包 zip（含图片与数学公式）",
   "permissions": [
     "downloads",
