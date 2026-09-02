@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>Dadealbit 知乎提取器</title>
+  <style>
+    body { width: 300px; margin: 0; padding: 14px; font-family: "Microsoft YaHei", sans-serif;
+           background: #f5f9fd; color: #2b4a6b; }
+    h1 { font-size: 15px; margin: 0 0 10px; color: #2e5e8c; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+    label { font-size: 13px; cursor: pointer; }
+    button { width: 100%; padding: 9px; border: 1px solid #b9dbf2; border-radius: 8px;
+             background: #fff; color: #2e5e8c; font-size: 13px; cursor: pointer; }
+    button:hover { background: #eef7ff; }
+    #btnExtract { background: linear-gradient(#a5d4f3, #7fbeec); color: #fff;
+                  border: 1px solid #6fb2e6; font-weight: bold; }
+    #btnExtract:hover { background: linear-gradient(#b7def7, #93caf1); }
+    hr { border: none; border-top: 1px dashed #c9e3f5; margin: 12px 0; }
+    textarea { width: 100%; height: 64px; box-sizing: border-box; border: 1px solid #c9e3f5;
+               border-radius: 8px; padding: 6px; font-size: 12px; resize: vertical; }
+    .tip { font-size: 11px; color: #7a9bb8; margin: 4px 0 8px; }
+    #status { margin-top: 10px; font-size: 12px; min-height: 16px; color: #2e5e8c; }
+    #status.err { color: #c0392b; }
+  </style>
+</head>
+<body>
+  <h1>Dadealbit 知乎提取器</h1>
+  <div class="row">
+    <label><input type="checkbox" id="cbMd" checked> Markdown</label>
+    <label><input type="checkbox" id="cbHtml" checked> HTML</label>
+    <label><input type="checkbox" id="cbPdf"> PDF(静默生成)</label>
+  </div>
+  <button id="btnExtract">⬇️ 提取当前页(打包 zip)</button>
+  <hr>
+  <textarea id="batchUrls" placeholder="批量链接(每行一个, 可粘贴文章/回答链接)"></textarea>
+  <div class="tip">批量模式会自动打开标签页逐个提取打包, 完成后自动关闭。链接过多时请分批次运行, 避免触发知乎风控。</div>
+  <button id="btnBatch">🚀 批量提取</button>
+  <div id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
